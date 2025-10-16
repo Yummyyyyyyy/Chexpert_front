@@ -1,0 +1,46 @@
+.heatmap-display-card {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #bbf7d0;
+}
+
+.heatmap-display-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.result-section {
+  margin-bottom: 8px;
+}
+
+.disease-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.disease-tag {
+  margin-left: 8px;
+  font-size: 16px;
+  padding: 4px 12px;
+}
+
+.explanation-box {
+  background-color: #eff6ff;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid #60a5fa;
+  margin: 0;
+}
+
+.recommendations-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recommendation-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
