@@ -1,0 +1,36 @@
+2025-10-16 15:08:52.944 | INFO     | app.main:startup_event:69 - 🚀 启动 CheXpert Backend API v1.0.0
+2025-10-16 15:08:52.944 | INFO     | app.main:startup_event:70 - 📝 API文档地址: http://0.0.0.0:8000/docs
+2025-10-16 15:08:52.944 | INFO     | app.main:startup_event:71 - 🌍 环境: 开发模式
+2025-10-16 15:09:02.235 | INFO     | app.main:shutdown_event:88 - 👋 应用正在关闭...
+2025-10-16 15:09:03.015 | INFO     | app.main:startup_event:69 - 🚀 启动 CheXpert Backend API v1.0.0
+2025-10-16 15:09:03.016 | INFO     | app.main:startup_event:70 - 📝 API文档地址: http://0.0.0.0:8000/docs
+2025-10-16 15:09:03.016 | INFO     | app.main:startup_event:71 - 🌍 环境: 开发模式
+2025-10-16 15:09:13.718 | INFO     | app.main:shutdown_event:88 - 👋 应用正在关闭...
+2025-10-16 15:09:14.593 | INFO     | app.main:startup_event:69 - 🚀 启动 CheXpert Backend API v1.0.0
+2025-10-16 15:09:14.593 | INFO     | app.main:startup_event:70 - 📝 API文档地址: http://0.0.0.0:8000/docs
+2025-10-16 15:09:14.593 | INFO     | app.main:startup_event:71 - 🌍 环境: 开发模式
+2025-10-16 15:09:57.231 | INFO     | app.main:startup_event:69 - 🚀 启动 CheXpert Backend API v1.0.0
+2025-10-16 15:09:57.231 | INFO     | app.main:startup_event:70 - 📝 API文档地址: http://0.0.0.0:8000/docs
+2025-10-16 15:09:57.231 | INFO     | app.main:startup_event:71 - 🌍 环境: 开发模式
+2025-10-16 15:10:12.575 | INFO     | app.api.v1.endpoints.third_party:query_knowledge_graph:44 - 🔍 收到知识图谱查询请求: Cardiomegaly
+2025-10-16 15:10:12.576 | WARNING  | app.services.third_party_service:query_disease:67 - ⚠️  第三方API调用逻辑待实现 (third_party_service.py:65)
+2025-10-16 15:10:12.576 | WARNING  | app.services.third_party_service:query_disease:74 - ⚠️  未配置第三方API地址或密钥，使用模拟数据
+2025-10-16 15:10:13.378 | INFO     | app.services.third_party_service:query_disease:127 - 🔍 模拟返回知识图谱: Cardiomegaly
+2025-10-16 15:10:13.379 | SUCCESS  | app.api.v1.endpoints.third_party:query_knowledge_graph:54 - ✅ 知识图谱查询成功: Cardiomegaly
+2025-10-16 15:18:15.352 | INFO     | app.api.v1.endpoints.third_party:query_knowledge_graph:44 - 🔍 收到知识图谱查询请求: Cardiomegaly
+2025-10-16 15:18:15.356 | WARNING  | app.services.third_party_service:query_disease:67 - ⚠️  第三方API调用逻辑待实现 (third_party_service.py:65)
+2025-10-16 15:18:15.356 | WARNING  | app.services.third_party_service:query_disease:74 - ⚠️  未配置第三方API地址或密钥，使用模拟数据
+2025-10-16 15:18:16.157 | INFO     | app.services.third_party_service:query_disease:127 - 🔍 模拟返回知识图谱: Cardiomegaly
+2025-10-16 15:18:16.158 | SUCCESS  | app.api.v1.endpoints.third_party:query_knowledge_graph:54 - ✅ 知识图谱查询成功: Cardiomegaly
+2025-10-16 15:19:39.764 | INFO     | app.api.v1.endpoints.upload:analyze_image:62 - 📥 收到图像上传请求: view1_frontal.jpg
+2025-10-16 15:19:39.766 | INFO     | app.utils.image_utils:save_upload_file:59 - 💾 文件已保存: uploads/original_733a19b6c7fc46538250da2676060e20.jpg
+2025-10-16 15:19:39.767 | INFO     | app.api.v1.endpoints.upload:analyze_image:66 - 💾 图片已保存: uploads/original_733a19b6c7fc46538250da2676060e20.jpg
+2025-10-16 15:19:39.767 | WARNING  | app.models.heatmap_generator:generate:66 - ⚠️  热力图生成逻辑待实现 (heatmap_generator.py:60)
+2025-10-16 15:19:40.268 | INFO     | app.models.heatmap_generator:generate:79 - 💡 模拟生成热力图: uploads/heatmap_1760599180.jpg
+2025-10-16 15:19:40.269 | SUCCESS  | app.api.v1.endpoints.upload:analyze_image:73 - ✅ 分析完成，检测到 3 个疾病类别
+2025-10-16 15:21:00.112 | INFO     | app.api.v1.endpoints.upload:analyze_image:62 - 📥 收到图像上传请求: view1_frontal.jpg
+2025-10-16 15:21:00.114 | INFO     | app.utils.image_utils:save_upload_file:59 - 💾 文件已保存: uploads/original_fd3611ecb2c442a28426a6936b1109fe.jpg
+2025-10-16 15:21:00.114 | INFO     | app.api.v1.endpoints.upload:analyze_image:66 - 💾 图片已保存: uploads/original_fd3611ecb2c442a28426a6936b1109fe.jpg
+2025-10-16 15:21:00.114 | WARNING  | app.models.heatmap_generator:generate:66 - ⚠️  热力图生成逻辑待实现 (heatmap_generator.py:60)
+2025-10-16 15:21:00.616 | INFO     | app.models.heatmap_generator:generate:79 - 💡 模拟生成热力图: uploads/heatmap_1760599260.jpg
+2025-10-16 15:21:00.617 | SUCCESS  | app.api.v1.endpoints.upload:analyze_image:73 - ✅ 分析完成，检测到 3 个疾病类别
