@@ -1,18 +1,7 @@
 /**
  * Upload功能模块的API服务
  */
-
-// Mock分析结果数据
-const mockAnalysisResults = {
-  disease: 'Pneumonia',
-  confidence: 87.5,
-  explanation: 'AI analysis detected consolidation patterns in the right lower lobe consistent with bacterial pneumonia. The opacity shows air bronchograms and increased density compared to surrounding healthy lung tissue.',
-  recommendations: [
-    'Consider antibiotic treatment',
-    'Monitor oxygen saturation',
-    'Follow-up chest X-ray in 48-72 hours'
-  ]
-};
+import { API_ENDPOINTS, apiPostFormData } from '../../config/api';
 
 /**
  * 上传并分析CT图像
@@ -20,40 +9,52 @@ const mockAnalysisResults = {
  * @returns {Promise<Object>} 分析结果
  */
 export const uploadAndAnalyzeImage = async (file) => {
-  // 模拟API调用延迟
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(mockAnalysisResults);
-    }, 2000);
-  });
+  try {
+    // 创建FormData对象
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // 调用后端API
+    const response = await apiPostFormData(API_ENDPOINTS.IMAGE_ANALYZE, formData);
+
+    if (!response.success) {
+      throw new Error(response.message || '图像分析失败');
+    }
+
+    // 转换为前端期望的格式
+    const primaryDisease = response.classifications && response.classifications.length > 0
+      ? response.classifications[0]
+      : { label: 'Unknown', confidence: 0, description: '未知' };
+
+    return {
+      disease: primaryDisease.label,
+      confidence: primaryDisease.confidence * 100,
+      explanation: primaryDisease.description || '暂无详细说明',
+      recommendations: response.classifications.map(c =>
+        c.description + ': ' + (c.confidence * 100).toFixed(1) + '%'
+      ),
+      rawResponse: response,
+      heatmapUrl: response.heatmap_image_url,
+      originalImageUrl: response.original_image_url,
+    };
+
+  } catch (error) {
+    console.error('上传图像失败:', error);
+    throw new Error(error.message || '图像上传失败，请检查网络连接或后端服务');
+  }
 };
 
-/**
- * 验证文件类型
- * @param {File} file - 要验证的文件
- * @returns {boolean} 是否为有效文件类型
- */
 export const validateFileType = (file) => {
   const validTypes = ['.dcm', '.jpg', '.jpeg', '.png'];
   const fileName = file.name.toLowerCase();
   return validTypes.some(type => fileName.endsWith(type));
 };
 
-/**
- * 验证文件大小（最大50MB）
- * @param {File} file - 要验证的文件
- * @returns {boolean} 是否符合大小限制
- */
 export const validateFileSize = (file) => {
-  const maxSize = 50 * 1024 * 1024; // 50MB
+  const maxSize = 50 * 1024 * 1024;
   return file.size <= maxSize;
 };
 
-/**
- * 获取文件预览URL
- * @param {File} file - 文件对象
- * @returns {string} 预览URL
- */
 export const getFilePreviewUrl = (file) => {
   return URL.createObjectURL(file);
 };
