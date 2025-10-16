@@ -1,0 +1,12 @@
+.loading-container {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.loading-text {
+  display: block;
+  margin-top: 8px;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 500;
+}

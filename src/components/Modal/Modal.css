@@ -1,0 +1,60 @@
+.custom-modal .ant-modal-header {
+  border-radius: 8px 8px 0 0;
+  padding: 20px 24px;
+}
+
+.custom-modal .ant-modal-content {
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.custom-modal .ant-modal-title {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+/* Default */
+.modal-default .ant-modal-header {
+  background-color: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+/* Info */
+.modal-info .ant-modal-header {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-bottom: 2px solid #3b82f6;
+}
+
+.modal-info .ant-modal-title {
+  color: #1e40af;
+}
+
+/* Success */
+.modal-success .ant-modal-header {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-bottom: 2px solid #10b981;
+}
+
+.modal-success .ant-modal-title {
+  color: #047857;
+}
+
+/* Warning */
+.modal-warning .ant-modal-header {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-bottom: 2px solid #f59e0b;
+}
+
+.modal-warning .ant-modal-title {
+  color: #d97706;
+}
+
+/* Error */
+.modal-error .ant-modal-header {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-bottom: 2px solid #ef4444;
+}
+
+.modal-error .ant-modal-title {
+  color: #dc2626;
+}
