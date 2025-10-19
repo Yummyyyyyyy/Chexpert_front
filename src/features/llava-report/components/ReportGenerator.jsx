@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Card, Space, Typography, Input, Row, Col } from 'antd';
+import { Card, Space, Typography, Input, Row, Col, message } from 'antd';
 import { FileTextOutlined, RobotOutlined } from '@ant-design/icons';
 import Button from '../../../components/Button';
 import Loading from '../../../components/Loading';
+import { generateMedicalReport } from '../api';
 import './ReportGenerator.css';
 
 const { TextArea } = Input;
@@ -20,22 +21,22 @@ const ReportGenerator = ({ analysisData, onReportGenerated }) => {
   const handleGenerateReport = async () => {
     setIsGenerating(true);
 
-    // 模拟调用LLaVA API
-    setTimeout(() => {
-      const generatedReport = {
-        title: 'Medical Imaging Analysis Report',
-        diagnosis: analysisData?.disease || 'No diagnosis available',
-        confidence: analysisData?.confidence || 0,
-        detailedAnalysis: analysisData?.explanation || 'No detailed analysis available',
-        recommendations: analysisData?.recommendations || [],
-        generatedBy: 'LLaVA Medical AI Model',
-        timestamp: new Date().toLocaleString(),
-        customNotes: customPrompt
-      };
+    try {
+      // 调用真实的 LLaVA API
+      message.info('正在调用 LLaVA 模型生成报告，请稍候...');
+      const generatedReport = await generateMedicalReport(analysisData, customPrompt);
 
-      setIsGenerating(false);
+      message.success(`报告生成成功！耗时 ${generatedReport.processingTime?.toFixed(2)} 秒`);
       onReportGenerated(generatedReport);
-    }, 3000);
+    } catch (error) {
+      console.error('报告生成失败:', error);
+      message.error(`报告生成失败: ${error.message}`);
+
+      // 如果 API 调用失败，可以选择显示一个错误报告
+      // 或者什么都不做，让用户重试
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (

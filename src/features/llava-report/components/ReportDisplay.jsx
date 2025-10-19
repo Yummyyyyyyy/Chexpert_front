@@ -70,7 +70,7 @@ const ReportDisplay = ({ report }) => {
         {/* 详细分析 */}
         <div className="report-section">
           <Text strong className="section-title">Detailed Analysis:</Text>
-          <Paragraph className="analysis-box">
+          <Paragraph className="analysis-box" style={{ whiteSpace: 'pre-line' }}>
             {report.detailedAnalysis}
           </Paragraph>
         </div>
