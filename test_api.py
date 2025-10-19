@@ -44,7 +44,7 @@ def test_report_generate():
 
     data = {
         "image_path": "/uploads/test.jpg",
-        "prompt": "请分析这张X光片"
+        "prompt": "You are an experienced radiologist. Analyze this chest X-ray image and generate a comprehensive diagnostic report including FINDINGS, IMPRESSION AND SUMMARY sections."
     }
 
     response = requests.post(

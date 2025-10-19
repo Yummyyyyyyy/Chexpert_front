@@ -1,129 +1,165 @@
 """
-LLaVA模型服务
-调用自研多模态模型生成医学报告
+LLaVA模型服务 - 通过 Colab API 远程调用
+调用部署在 Colab 上的 LLaVA 模型生成医学报告
 """
 from loguru import logger
 from typing import Tuple
 import time
-import os
+import httpx
+import base64
+
+from app.config import settings
 
 
 class LLaVAService:
-    """
-    LLaVA模型调用服务
-
-    【TODO - 后端团队成员需要实现】:
-    1. 实现真实的LLaVA模型推理逻辑
-    2. 优化提示词模板，提高报告质量
-    3. 添加报告后处理（格式化、去除重复等）
-    4. 考虑添加批量推理支持
-    5. 添加推理缓存机制
-    """
+    """LLaVA模型调用服务 - 远程 API 版本"""
 
     def __init__(self):
-        # 【TODO】这里可以初始化模型或加载提示词模板
-        self.prompt_template = """
-作为一名专业的放射科医生，请仔细分析这张胸部X光片，并生成详细的医学报告。
-
-请包含以下内容：
-1. 影像观察（Image Findings）
-2. 病变描述（Pathology Description）
-3. 初步诊断（Impression）
-4. 建议（Recommendations）
-
-用户提示：{user_prompt}
-"""
+        """初始化服务"""
+        self.colab_api_url = settings.COLAB_API_URL
+        self.api_timeout = settings.API_TIMEOUT
 
     async def generate_report(
         self,
         image_path: str,
-        prompt: str
+        prompt: str = ""
     ) -> Tuple[str, float]:
         """
-        生成医学报告
+        生成医学报告 - 通过 Colab API
 
         参数:
             image_path: 图片路径
-            prompt: 用户自定义提示词
+            prompt: 用户自定义提示词 (可选)
 
         返回:
             (report, processing_time): 报告文本和处理时间
-
-        【TODO】后端团队成员实现:
-        ```python
-        from transformers import LlavaForConditionalGeneration, AutoProcessor
-        from PIL import Image
-
-        # 1. 加载图像
-        image = Image.open(image_path)
-
-        # 2. 准备输入
-        model = model_manager.get_llava_model()
-        processor = AutoProcessor.from_pretrained(settings.LLAVA_MODEL_PATH)
-
-        full_prompt = self.prompt_template.format(user_prompt=prompt)
-        inputs = processor(text=full_prompt, images=image, return_tensors="pt")
-
-        # 3. 模型推理
-        start_time = time.time()
-        with torch.no_grad():
-            outputs = model.generate(**inputs, max_new_tokens=512)
-        processing_time = time.time() - start_time
-
-        # 4. 解码输出
-        report = processor.decode(outputs[0], skip_special_tokens=True)
-
-        return report, processing_time
-        ```
         """
-        logger.warning("⚠️  LLaVA报告生成逻辑待实现 (llava_service.py:71)")
+        # 去除路径前导斜杠
+        image_path = image_path.lstrip('/')
 
-        # ============ 以下是模拟代码，供前端调试使用 ============
-        # 【后端团队成员需要替换为真实实现】
+        # 检查 Colab API 是否配置
+        if not self.colab_api_url:
+            raise ValueError("Colab API URL 未配置!")
 
-        # 检查图片是否存在
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"图片文件不存在: {image_path}")
+        try:
+            logger.info(f"📝 开始调用 Colab API: {image_path}")
+            start_time = time.time()
 
-        # 模拟推理时间
-        start_time = time.time()
-        await self._simulate_inference()
-        processing_time = time.time() - start_time
+            # 读取图片并转为 base64
+            with open(image_path, 'rb') as f:
+                image_base64 = base64.b64encode(f.read()).decode('utf-8')
 
-        # 模拟生成的报告（【TODO】替换为真实模型输出）
-        mock_report = f"""
-**胸部X光片分析报告**
+            # 准备请求数据
+            default_prompt = """You are an experienced radiologist. Analyze this chest X-ray image and generate a diagnostic report with EXACTLY these three sections:
 
-【影像观察】
-- 心影大小：轻度增大，心胸比约0.55（正常<0.5）
-- 肺野：双肺纹理增多，可见肺淤血征象
-- 肋膈角：双侧肋膈角清晰，未见积液
-- 骨骼结构：未见明显骨折或骨质破坏
+FINDINGS: [Only mention clinically significant findings relevant to diagnosis - abnormalities, lesions, or pathological changes. Skip normal anatomical descriptions unless diagnostically relevant]
 
-【病变描述】
-1. 心脏肥大（Cardiomegaly）：心影轮廓扩大，提示可能存在心功能不全
-2. 肺水肿（Pulmonary Edema）：双肺可见血管影模糊，符合肺淤血表现
+IMPRESSION: [List key diagnoses as numbered items: 1) diagnosis one 2) diagnosis two]
 
-【初步诊断】
-1. 心脏肥大
-2. 轻度肺水肿
+SUMMARY: [Brief clinical summary and recommendations]
 
-【建议】
-1. 建议进一步行心脏超声检查，评估心功能
-2. 完善血常规、BNP等检查
-3. 建议心内科会诊
+STRICT REQUIREMENTS:
+- Use ONLY plain text - NO markdown formatting, NO asterisks, NO bold, NO italics, NO special symbols
+- Use ONLY these three section headers: FINDINGS, IMPRESSION, SUMMARY
+- In FINDINGS: Be concise, only describe abnormalities or diagnostically relevant observations
+- Do NOT include: COMPARISON, TECHNIQUE, HISTORY, CLINICAL INDICATION, or any other sections
+- Do NOT compare with previous studies
+- Start directly with "FINDINGS:" without any preamble
+- Use simple numbered lists with parentheses: 1) 2) 3)
+- Output clean medical text only"""
 
-*报告生成时间: {processing_time:.2f}秒*
-*本报告由AI辅助生成，仅供参考，最终诊断请以医生判断为准*
+            request_data = {
+                "image": image_base64,
+                "prompt": prompt or default_prompt
+            }
 
----
-用户提示词: {prompt}
+            # 调用 Colab API
+            logger.info(f"🌐 调用 Colab API: {self.colab_api_url}")
+            async with httpx.AsyncClient(timeout=self.api_timeout) as client:
+                response = await client.post(self.colab_api_url, json=request_data)
+
+            # 检查响应
+            response.raise_for_status()  # 自动处理非 200 状态码
+
+            # 解析响应
+            result = response.json()
+            raw_report = result.get("report", "")
+
+            # 提取 assistant 后面的内容并格式化
+            report = self._format_report(raw_report)
+
+            processing_time = time.time() - start_time
+            logger.success(f"✅ 报告生成完成! 耗时: {processing_time:.2f}秒")
+
+            return report, processing_time
+
+        except httpx.TimeoutException:
+            logger.error(f"❌ API 调用超时 (>{self.api_timeout}秒)")
+            raise RuntimeError("Colab API 调用超时")
+        except httpx.HTTPStatusError as e:
+            logger.error(f"❌ API 返回错误: {e.response.status_code}")
+            raise RuntimeError(f"Colab API 调用失败: {e.response.status_code}")
+        except httpx.ConnectError:
+            logger.error(f"❌ 无法连接到 Colab API")
+            raise RuntimeError("无法连接到 Colab API, 请检查 Colab 是否在运行")
+        except FileNotFoundError:
+            logger.error(f"❌ 图片文件不存在: {image_path}")
+            raise
+        except Exception as e:
+            logger.error(f"❌ 报告生成失败: {str(e)}")
+            raise
+
+    def _format_report(self, raw_report: str) -> str:
         """
+        格式化报告：提取 assistant 后的内容，并每句话一行
 
-        logger.info(f"📝 模拟生成报告，耗时 {processing_time:.2f}秒")
-        return mock_report.strip(), processing_time
+        参数:
+            raw_report: 原始报告文本
 
-    async def _simulate_inference(self):
-        """模拟推理耗时"""
-        import asyncio
-        await asyncio.sleep(1.5)  # 模拟LLaVA推理耗时
+        返回:
+            格式化后的报告
+        """
+        import re
+
+        # 提取 assistant 后面的内容
+        # 先按行分割，找到 assistant 所在行
+        lines = raw_report.split('\n')
+        assistant_index = -1
+
+        for i, line in enumerate(lines):
+            if line.strip() == 'assistant':
+                assistant_index = i
+                break
+
+        if assistant_index >= 0 and assistant_index + 1 < len(lines):
+            # 提取 assistant 之后的所有行
+            report_lines = lines[assistant_index + 1:]
+            report = ' '.join(line.strip() for line in report_lines if line.strip())
+        elif "assistant" in raw_report:
+            # 备用方案：直接分割
+            report = raw_report.split("assistant", 1)[1].strip()
+        else:
+            report = raw_report.strip()
+
+        # 将编号项 1. 2. 3. 改成 1) 2) 3)
+        report = re.sub(r'(\d+)\.', r'\1)', report)
+
+        # 按句号、问号、感叹号分割
+        sentences = re.split(r'(?<=[.!?。！？])\s*', report)
+
+        # 过滤空行
+        formatted_lines = [s.strip() for s in sentences if s.strip()]
+
+        return '\n'.join(formatted_lines)
+
+
+# 全局单例
+_llava_service_instance = None
+
+
+def get_llava_service() -> LLaVAService:
+    """获取 LLaVA 服务单例"""
+    global _llava_service_instance
+    if _llava_service_instance is None:
+        _llava_service_instance = LLaVAService()
+    return _llava_service_instance

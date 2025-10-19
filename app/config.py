@@ -39,18 +39,22 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB，可根据医学图像大小调整
     ALLOWED_EXTENSIONS: set = {".jpg", ".jpeg", ".png", ".dcm"}  # 支持的图像格式
 
-    # ============ 模型配置 ============
-    # 【TODO】团队成员需要根据实际模型路径修改
-    MODEL_BASE_DIR: str = "app/models"
-    LLAVA_MODEL_PATH: Optional[str] = None  # 自研LLaVA模型路径
-    ADAPTER_PATH: Optional[str] = None  # LoRA/Adapter路径
-    DEVICE: str = "cuda"  # 推理设备：cuda/cpu/mps(Mac)
+    # ============ Colab API 配置 ============
+    # LLaVA 模型通过 Colab 远程调用
+    # COLAB_API_URL: Optional[str] = None  # Colab API 地址 (例如: https://xxxx.ngrok.io/predict)
+    # 【重要】部署 Colab 后,请设置此 URL
+    # 步骤:
+    # 1. 在 Colab 中运行 LLaVA 推理服务
+    # 2. 使用 ngrok 或 Cloudflare Tunnel 映射到公网
+    # 3. 将映射后的 URL 填写到这里
+    # 例如: COLAB_API_URL = "https://abc123.ngrok.io/predict"
+    COLAB_API_URL: str = "https://electrophoretic-garnet-bouncily.ngrok-free.dev/predict"
 
     # ============ 第三方API配置 ============
     # 【TODO】团队成员需要添加实际的API密钥
     THIRD_PARTY_API_URL: Optional[str] = None  # 知识图谱API地址
     THIRD_PARTY_API_KEY: Optional[str] = None  # API密钥
-    API_TIMEOUT: int = 30  # API调用超时时间（秒）
+    API_TIMEOUT: int = 120  # API调用超时时间（秒） - Colab 推理可能需要较长时间
 
     # ============ 日志配置 ============
     LOG_LEVEL: str = "INFO"  # DEBUG/INFO/WARNING/ERROR
@@ -74,5 +78,4 @@ def init_directories():
     """初始化必要的目录结构"""
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     os.makedirs("logs", exist_ok=True)
-    os.makedirs(settings.MODEL_BASE_DIR, exist_ok=True)
-    print(f"✅ 目录初始化完成: {settings.UPLOAD_DIR}, logs, {settings.MODEL_BASE_DIR}")
+    print(f"✅ 目录初始化完成: {settings.UPLOAD_DIR}, logs")
