@@ -7,10 +7,8 @@ python-multipart==0.0.6  # 文件上传支持
 pydantic==2.5.0
 pydantic-settings==2.1.0
 
-# 深度学习框架（根据实际模型选择）
-# torch==2.1.0  # 【需要根据CUDA版本调整】
-# torchvision==0.16.0
-# transformers==4.35.0  # Hugging Face模型库（LLaVA）
+# 深度学习框架 (仅用于图像处理,不再需要本地模型推理)
+# torch 和 transformers 已移除,通过 Colab API 远程调用
 
 # 图像处理
 Pillow==10.1.0

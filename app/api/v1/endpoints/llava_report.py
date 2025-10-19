@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, status
 from loguru import logger
 
 from app.models.schemas import ReportRequest, ReportResponse
-from app.services.llava_service import LLaVAService
+from app.services.llava_service import get_llava_service
 
 
 router = APIRouter()
@@ -43,8 +43,8 @@ async def generate_report(request: ReportRequest):
         logger.info(f"📝 收到报告生成请求: {request.image_path}")
 
         # 【核心逻辑】调用LLaVA服务生成报告
-        # 【TODO】这里需要后端团队成员实现真实的模型推理
-        llava_service = LLaVAService()
+        # 使用单例模式,避免重复加载模型
+        llava_service = get_llava_service()
         report, processing_time = await llava_service.generate_report(
             image_path=request.image_path,
             prompt=request.prompt
