@@ -1,6 +1,7 @@
 /**
  * 第三方API模块 - 知识图谱服务
  */
+import { API_ENDPOINTS, apiPost } from '../../config/api';
 
 /**
  * 获取医学知识图谱数据
@@ -8,27 +9,39 @@
  * @returns {Promise<Object>} 知识图谱数据
  */
 export const fetchKnowledgeGraph = async (disease) => {
-  // 模拟API调用
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const graphData = {
-        disease,
-        nodes: [
-          { id: 1, label: disease, type: 'disease' },
-          { id: 2, label: 'Symptoms', type: 'category' },
-          { id: 3, label: 'Treatments', type: 'category' },
-          { id: 4, label: 'Related Conditions', type: 'category' }
-        ],
-        edges: [
-          { from: 1, to: 2 },
-          { from: 1, to: 3 },
-          { from: 1, to: 4 }
-        ],
-        imageUrl: '/image/IMG_1674.jpg'
-      };
-      resolve(graphData);
-    }, 1000);
-  });
+  try {
+    // 调用后端API
+    const response = await apiPost(API_ENDPOINTS.KNOWLEDGE_QUERY, {
+      disease_name: disease,
+      language: 'zh'
+    });
+
+    if (!response.success) {
+      throw new Error(response.message || '知识图谱查询失败');
+    }
+
+    const kg = response.knowledge_graph;
+
+    // 转换为前端期望的格式
+    return {
+      disease: response.disease_name,
+      nodes: kg.graph_visualization?.nodes || [
+        { id: 1, label: disease, type: 'disease' },
+      ],
+      edges: kg.graph_visualization?.edges || [],
+      imageUrl: '/image/IMG_1674.jpg',
+      description: kg.description,
+      symptoms: kg.symptoms,
+      causes: kg.causes,
+      treatments: kg.treatments,
+      prevention: kg.prevention,
+      relatedDiseases: kg.related_diseases
+    };
+
+  } catch (error) {
+    console.error('获取知识图谱失败:', error);
+    throw new Error(error.message || '知识图谱查询失败，请检查网络连接或后端服务');
+  }
 };
 
 /**
@@ -37,19 +50,14 @@ export const fetchKnowledgeGraph = async (disease) => {
  * @returns {Promise<Object>} 疾病详细信息
  */
 export const fetchDiseaseInfo = async (disease) => {
-  // 模拟API调用
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const diseaseInfo = {
-        name: disease,
-        description: `Detailed information about ${disease}`,
-        symptoms: ['Symptom 1', 'Symptom 2', 'Symptom 3'],
-        treatments: ['Treatment 1', 'Treatment 2'],
-        relatedConditions: ['Related condition 1', 'Related condition 2']
-      };
-      resolve(diseaseInfo);
-    }, 1000);
-  });
+  const graphData = await fetchKnowledgeGraph(disease);
+  return {
+    name: disease,
+    description: graphData.description || '',
+    symptoms: graphData.symptoms || [],
+    treatments: graphData.treatments || [],
+    relatedConditions: graphData.relatedDiseases || []
+  };
 };
 
 /**
@@ -58,13 +66,12 @@ export const fetchDiseaseInfo = async (disease) => {
  * @returns {Promise<Array>} 文献列表
  */
 export const searchMedicalLiterature = async (query) => {
-  // 模拟API调用
   return new Promise((resolve) => {
     setTimeout(() => {
       const literature = [
         {
           id: 1,
-          title: `Study on ${query}`,
+          title: 'Study on ' + query,
           authors: ['Author A', 'Author B'],
           year: 2023,
           abstract: 'Abstract content...'
