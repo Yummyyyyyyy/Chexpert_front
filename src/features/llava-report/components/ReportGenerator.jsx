@@ -3,7 +3,7 @@ import { Card, Space, Typography, Input, Row, Col, message } from 'antd';
 import { FileTextOutlined, RobotOutlined } from '@ant-design/icons';
 import Button from '../../../components/Button';
 import Loading from '../../../components/Loading';
-import { generateMedicalReport } from '../api';
+import { generateMedicalReport, generateMedicalReportV2 } from '../api';
 import './ReportGenerator.css';
 
 const { TextArea } = Input;
@@ -34,6 +34,24 @@ const ReportGenerator = ({ analysisData, onReportGenerated }) => {
 
       // 如果 API 调用失败，可以选择显示一个错误报告
       // 或者什么都不做，让用户重试
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleGenerateReportV2 = async () => {
+    setIsGenerating(true);
+
+    try {
+      // 调用 LLAVA-7B API
+      message.info('正在调用 LLAVA-7B 模型生成报告，请稍候...');
+      const generatedReport = await generateMedicalReportV2(analysisData, customPrompt);
+
+      message.success(`LLAVA-7B报告生成成功！耗时 ${generatedReport.processingTime?.toFixed(2)} 秒`);
+      onReportGenerated(generatedReport);
+    } catch (error) {
+      console.error('LLAVA-7B报告生成失败:', error);
+      message.error(`LLAVA-7B报告生成失败: ${error.message}`);
     } finally {
       setIsGenerating(false);
     }
@@ -80,7 +98,7 @@ const ReportGenerator = ({ analysisData, onReportGenerated }) => {
             </div>
           </Col>
 
-          <Col span={24}>
+          <Col span={12}>
             <Button
               variant="primary"
               gradient
@@ -90,14 +108,28 @@ const ReportGenerator = ({ analysisData, onReportGenerated }) => {
               style={{ width: '100%' }}
               icon={<FileTextOutlined />}
             >
-              {isGenerating ? 'Generating Report...' : 'Generate Comprehensive Report'}
+              {isGenerating ? 'Generating...' : 'Generate Report (LLaVA)'}
+            </Button>
+          </Col>
+
+          <Col span={12}>
+            <Button
+              variant="primary"
+              gradient
+              size="large"
+              onClick={handleGenerateReportV2}
+              disabled={!analysisData || isGenerating}
+              style={{ width: '100%', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+              icon={<FileTextOutlined />}
+            >
+              {isGenerating ? 'Generating...' : 'Generate Report (LLAVA-7B)'}
             </Button>
           </Col>
 
           <Col span={24}>
             <Loading
               visible={isGenerating}
-              message="LLaVA AI is generating your comprehensive medical report..."
+              message="AI is generating your comprehensive medical report..."
               progress={100}
             />
           </Col>

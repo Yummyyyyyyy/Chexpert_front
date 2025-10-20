@@ -32,7 +32,7 @@ function Dashboard() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [generatedReport, setGeneratedReport] = useState(null);
+  const [generatedReports, setGeneratedReports] = useState([]);
 
   const handleFileUpload = async (info) => {
     const { file } = info;
@@ -41,6 +41,8 @@ function Dashboard() {
     if (file.status !== 'uploading') {
       // 开始AI分析
       setIsAnalyzing(true);
+      // 清空之前的报告
+      setGeneratedReports([]);
       try {
         const results = await uploadAndAnalyzeImage(file);
         setAnalysisResults(results);
@@ -53,7 +55,8 @@ function Dashboard() {
   };
 
   const handleReportGenerated = (report) => {
-    setGeneratedReport(report);
+    // 添加新报告到列表中
+    setGeneratedReports(prevReports => [...prevReports, report]);
   };
 
   const handleHistoryClick = () => {
@@ -214,7 +217,7 @@ function Dashboard() {
                 />
               </Col>
               <Col span={12}>
-                <ReportDisplay report={generatedReport} />
+                <ReportDisplay reports={generatedReports} />
               </Col>
             </Row>
           )}
