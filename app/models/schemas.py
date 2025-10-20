@@ -51,3 +51,11 @@ class KnowledgeGraphResponse(BaseModel):
     message: str
     disease_name: str
     knowledge_graph: dict  # 知识图谱数据（JSON格式）
+
+
+# ============ LLAVA-7B报告生成相关模型 ============
+class Llava7bReportRequest(BaseModel):
+    """LLAVA-7B报告生成请求"""
+    image_path: str  # 图片路径（可以是前面上传接口返回的路径）
+    prompt: Optional[str] = None  # 自定义提示词（可选）
+    support_info: Optional[str] = None  # 分类结果支持信息（可选，预留给未来的/api/v1/image/analyze接口）

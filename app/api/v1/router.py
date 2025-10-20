@@ -4,7 +4,7 @@ API路由汇总
 """
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import upload, llava_report, third_party
+from app.api.v1.endpoints import upload, llava_report, llava7b_report, third_party
 
 
 # 创建v1版本的总路由
@@ -21,6 +21,12 @@ api_router.include_router(
     llava_report.router,
     prefix="/report",
     tags=["功能2: 报告生成"]
+)
+
+api_router.include_router(
+    llava7b_report.router,
+    prefix="/report",
+    tags=["功能2扩展: LLAVA-7B报告生成"]
 )
 
 api_router.include_router(

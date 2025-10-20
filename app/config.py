@@ -50,6 +50,14 @@ class Settings(BaseSettings):
     # 例如: COLAB_API_URL = "https://abc123.ngrok.io/predict"
     COLAB_API_URL: str = "https://electrophoretic-garnet-bouncily.ngrok-free.dev/predict"
 
+    # ============ LLAVA-7B API 配置 ============
+    # LLAVA-7B 模型通过 ngrok 远程调用
+    # 参考: model_llava/deploy/test_ngork.py
+    # 【重要】请设置 LLAVA-7B 模型的 ngrok URL
+    # 格式: https://xxxx.ngrok-free.dev/inference
+    LLAVA_7B_API_URL: str = "https://outwardly-electromotive-lady.ngrok-free.dev/inference"  # LLAVA-7B API 地址
+    # 示例: LLAVA_7B_API_URL = "https://outwardly-electromotive-lady.ngrok-free.dev/inference"
+
     # ============ 第三方API配置 ============
     # 【TODO】团队成员需要添加实际的API密钥
     THIRD_PARTY_API_URL: Optional[str] = None  # 知识图谱API地址
