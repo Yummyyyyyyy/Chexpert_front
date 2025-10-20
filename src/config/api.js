@@ -17,6 +17,9 @@ export const API_ENDPOINTS = {
   // 报告生成
   REPORT_GENERATE: `${API_BASE_URL}${API_V1_PREFIX}/report/generate`,
 
+  // 报告生成 V2 (LLAVA-7B)
+  REPORT_GENERATE_V2: `${API_BASE_URL}${API_V1_PREFIX}/report/generate-v2`,
+
   // 知识图谱
   KNOWLEDGE_QUERY: `${API_BASE_URL}${API_V1_PREFIX}/knowledge/query`,
 
