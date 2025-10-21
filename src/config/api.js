@@ -1,85 +1,35 @@
-/**
- * API配置文件
- * 统一管理后端API地址
- */
+// src/config/api.js
+export const API_BASE_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) ||
+  process.env.REACT_APP_API_BASE_URL ||
+  'http://localhost:8000';
 
-// 后端API基础URL
-export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
-
-// API版本前缀
-export const API_V1_PREFIX = '/api/v1';
-
-// 完整的API端点
 export const API_ENDPOINTS = {
-  // 图像分析
-  IMAGE_ANALYZE: `${API_BASE_URL}${API_V1_PREFIX}/image/analyze`,
-
-  // 报告生成
-  REPORT_GENERATE: `${API_BASE_URL}${API_V1_PREFIX}/report/generate`,
-
-  // 报告生成 V2 (LLAVA-7B)
-  REPORT_GENERATE_V2: `${API_BASE_URL}${API_V1_PREFIX}/report/generate-v2`,
-
-  // 知识图谱
-  KNOWLEDGE_QUERY: `${API_BASE_URL}${API_V1_PREFIX}/knowledge/query`,
-
-  // 健康检查
-  HEALTH: `${API_BASE_URL}/health`,
+  ANALYZE:       `${API_BASE_URL}/api/v1/image/analyze`,
+  PATHO_ANALYZE: `${API_BASE_URL}/api/v1/pathology/analyze`,
+  PATHO_LABELS:  `${API_BASE_URL}/api/v1/pathology/labels`,
+  REPORT:        `${API_BASE_URL}/api/v1/report/generate`,
+  HISTORY_LIST:   `${API_BASE_URL}/api/v1/history/list`,
+  HISTORY_ADD:    `${API_BASE_URL}/api/v1/history/add`,
+  REPORT_GENERATE: `${API_BASE_URL}/api/v1/report/generate`,
 };
 
-/**
- * 通用的fetch请求封装
- * @param {string} url - 请求URL
- * @param {Object} options - fetch选项
- * @returns {Promise} 响应数据
- */
-export const apiFetch = async (url, options = {}) => {
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...options.headers,
-      },
-    });
 
-    // 检查HTTP状态
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({
-        error: 'Network error',
-        detail: response.statusText
-      }));
-      throw new Error(error.detail || error.error || 'API request failed');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('API请求失败:', error);
-    throw error;
-  }
-};
-
-/**
- * POST请求封装（JSON）
- */
-export const apiPost = (url, data) => {
-  return apiFetch(url, {
+// 兼容函数（别的模块可能还在用）
+const toAbs = (u) => (!u ? null : (/^https?:\/\//i.test(u) ? u : `${API_BASE_URL}${u.startsWith('/') ? '' : '/'}${u}`));
+export { toAbs };
+export async function apiPost(url, body = {}, options = {}) {
+  const r = await fetch(/^https?:\/\//i.test(url) ? url : `${API_BASE_URL}${url}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    body: JSON.stringify(body),
+    ...options,
   });
-};
-
-/**
- * POST请求封装（FormData，用于文件上传）
- */
-export const apiPostFormData = (url, formData) => {
-  return apiFetch(url, {
-    method: 'POST',
-    body: formData,
-    // 注意：上传文件时不要手动设置Content-Type，让浏览器自动设置
+  return r.json().catch(() => ({}));
+}
+export async function apiGet(url, options = {}) {
+  const r = await fetch(/^https?:\/\//i.test(url) ? url : `${API_BASE_URL}${url}`, {
+    method: 'GET', ...(options || {}),
   });
-};
-
-export default API_ENDPOINTS;
+  return r.json().catch(() => ({}));
+}

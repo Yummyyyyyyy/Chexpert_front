@@ -1,0 +1,246 @@
+/* PathologyCard 卡片样式 */
+.pathology-card {
+  position: relative;
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid;
+  background: #ffffff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideInCard 0.5s ease-out forwards;
+  animation-delay: calc(var(--card-index) * 0.05s);
+  opacity: 0;
+  cursor: pointer;
+}
+
+@keyframes slideInCard {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.pathology-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* 排名标识 */
+.card-rank {
+  position: absolute;
+  top: -8px;
+  left: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1;
+}
+
+/* 卡片头部 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.severity-icon {
+  font-size: 20px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.card-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-title h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.label-cn {
+  display: block;
+  font-size: 13px;
+  color: #8c8c8c;
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+/* 概率徽章 */
+.probability-badge {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  min-width: 60px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* 进度条区域 */
+.card-progress {
+  margin: 12px 0;
+}
+
+.card-progress .ant-progress-bg {
+  border-radius: 4px;
+  height: 8px !important;
+}
+
+.card-progress .ant-progress-inner {
+  border-radius: 4px;
+  background-color: #f0f0f0;
+}
+
+/* 卡片底部 */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* 严重程度标签 */
+.severity-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid;
+  transition: all 0.3s ease;
+}
+
+.pathology-card:hover .severity-tag {
+  transform: scale(1.05);
+}
+
+/* 置信度指示器 */
+.confidence-indicators {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.indicator-dot.active {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+/* 特殊效果 - 高风险闪烁 */
+.pathology-card[style*="border-color: #ff4d4f"] .card-rank {
+  animation: highRiskPulse 2s ease-in-out infinite;
+}
+
+@keyframes highRiskPulse {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(255, 77, 79, 0.6);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .pathology-card {
+    padding: 12px;
+  }
+
+  .card-rank {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .card-title h4 {
+    font-size: 14px;
+  }
+
+  .label-cn {
+    font-size: 12px;
+  }
+
+  .probability-badge {
+    padding: 4px 10px;
+    font-size: 14px;
+    min-width: 50px;
+  }
+
+  .severity-tag {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+
+  .indicator-dot {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .pathology-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #d9d9d9;
+  }
+
+  .pathology-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .card-rank {
+    position: static;
+    display: inline-flex;
+    margin-right: 8px;
+  }
+}
