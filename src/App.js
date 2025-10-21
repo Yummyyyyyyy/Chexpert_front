@@ -25,11 +25,10 @@ import {
   ExperimentOutlined,
 } from '@ant-design/icons';
 
-import { API_ENDPOINTS } from './config/api';
-
 // Feature modules
 import { UploadImage, HeatmapDisplay } from './features/upload';
 import { KnowledgeGraph } from './features/third-party-api';
+import { ReportSection } from './features/llava-report';
 import AnalysisHistory from './AnalysisHistory';
 
 // 新增：左右两列显示两个模型标签
@@ -47,8 +46,6 @@ function Dashboard() {
   // Upload / Analysis states
   const [selectedFile, setSelectedFile] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
-  const [generatedReport, setGeneratedReport] = useState(null);
-  const [reportLoading, setReportLoading] = useState(false);
   const [activeResultTab, setActiveResultTab] = useState('heatmap');
 
   const handleHistoryClick = () => navigate('/history');
@@ -177,38 +174,14 @@ function Dashboard() {
             <Col span={7}>
               <UploadImage
                 onFileChange={(f) => setSelectedFile(f)}
-                onAnalysisFinished={async (res) => {
+                onAnalysisFinished={(res) => {
                   // 这里的 res 来自我们在 upload/api.js 里合并后的 analyzeBoth 输出
                   if (!res || !res.success) {
                     setAnalysisResults(null);
-                    setGeneratedReport(null);
                     message.error(res?.message || 'Analyze failed');
                     return;
                   }
                   setAnalysisResults(res);
-
-                  // 自动生成报告（以 CheXpert 的分类为主）
-                  try {
-                    setReportLoading(true);
-                    const heatmap  = res.heatmapUrl || res.heatmap_image_url || null;
-                    const original = res.originalImageUrl || res.original_image_url || null;
-                    const resp = await fetch(API_ENDPOINTS.REPORT, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        classifications: res.classifications || res.chexpert?.classifications || [],
-                        heatmap_image_url: heatmap,
-                        original_image_url: original
-                      })
-                    });
-                    const data = await resp.json();
-                    setGeneratedReport(data?.success && data.report_text ? data.report_text : null);
-                  } catch (e) {
-                    console.error('Report generation error:', e);
-                    setGeneratedReport(null);
-                  } finally {
-                    setReportLoading(false);
-                  }
                 }}
               />
             </Col>
@@ -256,15 +229,11 @@ function Dashboard() {
             </Col>
           </Row>
 
-          {/* Report section */}
+          {/* Report section with dual-model support */}
           {analysisResults && (
             <Row gutter={24} style={{ marginTop: '24px' }}>
               <Col span={24}>
-                <Card title="Report">
-                  <div style={{ whiteSpace: 'pre-wrap', opacity: reportLoading ? 0.6 : 1 }}>
-                    {reportLoading ? 'Generating report...' : (generatedReport || 'No report')}
-                  </div>
-                </Card>
+                <ReportSection analysisResults={analysisResults} />
               </Col>
             </Row>
           )}
