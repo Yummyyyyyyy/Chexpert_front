@@ -70,3 +70,4 @@ htmlcov/
 .AppleDouble
 .LSOverride
 ._*
+node_modules/
