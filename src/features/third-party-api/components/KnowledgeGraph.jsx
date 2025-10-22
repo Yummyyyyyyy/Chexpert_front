@@ -13,6 +13,25 @@ const { Text, Title } = Typography;
 const KnowledgeGraph = ({ analysisResults, selectedFile }) => {
   const hasData = selectedFile && analysisResults;
 
+  const diseaseImages = {
+    'Atelectasis': '/image/KG_Atelectasis.png',
+    'Cardiomegaly': '/image/KG_Cardiomegaly.png',
+    'Consolidation': '/image/KG_Consolidation.png',
+    'Edema': '/image/KG_Edema.png',
+    'Enlarged Cardiomediastinum': '/image/KG_Enlarged_Cardiomediastinum.png',
+    'Fracture': '/image/KG_Fracture.png',
+    'Lung Lesion': '/image/KG_Lung_Lesion.png',
+    'Lung Opacity': '/image/KG_Lung_Opacity.png',
+    'Pleural Effusion': '/image/KG_Pleural_Effusion.png',
+    'Pleural Other': '/image/KG_Pleural_Other.png',
+    'Pneumonia': '/image/KG_Pneumonia.png',
+    'Pneumothorax': '/image/KG_Pneumothorax.png',
+    'Support Devices': '/image/KG_Support_Devices.png'
+  };
+
+  const imageSrc = diseaseImages[analysisResults?.disease] ?? '/image/KG.png';
+
+
   return (
     <Card
       title={
@@ -30,7 +49,8 @@ const KnowledgeGraph = ({ analysisResults, selectedFile }) => {
               Knowledge Graph for: {analysisResults.disease}
             </Text>
             <Image
-              src="/image/IMG_1674.jpg"
+              // src="/image/KG.png"
+              src={imageSrc}
               alt="Medical Knowledge Graph"
               className="graph-image"
               fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3Ik1RnG4W+FgYxN"

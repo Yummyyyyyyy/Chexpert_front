@@ -61,3 +61,33 @@ export async function generateLLaVA7BReport({ image_path, pathology_labels, prom
   const data = await response.json();
   return data;
 }
+
+/**
+ * 生成 GLM-4V + RAG 报告
+ * @param {Object} params
+ * @param {string} params.image_path - 图片路径
+ * @param {Array<string>} params.pathology_labels - 病症标签列表（Top3）
+ * @param {string} params.prompt - 可选的自定义提示词
+ * @param {string} params.rag_query - 可选的检索查询语句
+ * @param {Object<string, number>} params.classifier_probs - 可选：分类器标签-置信度映射
+ * @returns {Promise<{success: boolean, report: string, processing_time: number}>}
+ */
+export async function generateGLM4VRAGReport({ image_path, pathology_labels, prompt, rag_query, classifier_probs }) {
+  const response = await fetch(API_ENDPOINTS.REPORT_GLM4V_RAG, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      image_path,
+      pathology_labels,
+      prompt,
+      rag_query,
+      classifier_probs
+    })
+  });
+
+  const data = await response.json();
+  return data;
+}
+
+
+

@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   REPORT_GENERATE: `${API_BASE_URL}/api/v1/report/generate`,
   REPORT_LLAVA:   `${API_BASE_URL}/api/v1/report/generate`,      // LLaVA模型
   REPORT_LLAVA7B: `${API_BASE_URL}/api/v1/report/generate-v2`,   // LLaVA-7B模型
+  REPORT_GLM4V_RAG: `${API_BASE_URL}/api/v1/report/generate-glm4v-rag`, // GLM-4V + RAG
 };
 
 
