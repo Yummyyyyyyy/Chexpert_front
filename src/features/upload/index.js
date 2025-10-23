@@ -1,4 +1,16 @@
-// 导出upload功能模块的所有组件和API
+// src/features/upload/index.js
+
+// Components
 export { default as UploadImage } from './components/UploadImage';
 export { default as HeatmapDisplay } from './components/HeatmapDisplay';
-export * from './api';
+
+// API functions
+export { 
+  uploadAndAnalyzeImage,
+  uploadAndAnalyzeImageFull,  // 【新增】
+  analyzePathology,            // 【新增】
+  getPathologyLabels,          // 【新增】
+  validateFileType,
+  validateFileSize,
+  getFilePreviewUrl
+} from './api';

@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import {
@@ -7,61 +8,47 @@ import {
   Col,
   Typography,
   Statistic,
-  Tag
+  Tag,
+  Empty,
+  Button,
+  Space,
+  message,
+  Tabs,
 } from 'antd';
 import {
   FileImageOutlined,
   MedicineBoxOutlined,
   HistoryOutlined,
   CheckCircleOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
+  ThunderboltOutlined,
+  ExperimentOutlined,
 } from '@ant-design/icons';
 
-// 导入新的模块化组件
-import { UploadImage, HeatmapDisplay, uploadAndAnalyzeImage } from './features/upload';
-import { ReportGenerator, ReportDisplay } from './features/llava-report';
+// Feature modules
+import { UploadImage, HeatmapDisplay } from './features/upload';
 import { KnowledgeGraph } from './features/third-party-api';
+import { ReportSection } from './features/llava-report';
 import AnalysisHistory from './AnalysisHistory';
+
+// 新增：左右两列显示两个模型标签
+import PathologyLabels from './features/upload/components/PathologyLabels';
+
 import './App.css';
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
+const { TabPane } = Tabs;
 
 function Dashboard() {
   const navigate = useNavigate();
+
+  // Upload / Analysis states
   const [selectedFile, setSelectedFile] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [generatedReports, setGeneratedReports] = useState([]);
+  const [activeResultTab, setActiveResultTab] = useState('heatmap');
 
-  const handleFileUpload = async (info) => {
-    const { file } = info;
-    setSelectedFile(file);
-
-    if (file.status !== 'uploading') {
-      // 开始AI分析
-      setIsAnalyzing(true);
-      // 清空之前的报告
-      setGeneratedReports([]);
-      try {
-        const results = await uploadAndAnalyzeImage(file);
-        setAnalysisResults(results);
-      } catch (error) {
-        console.error('Analysis failed:', error);
-      } finally {
-        setIsAnalyzing(false);
-      }
-    }
-  };
-
-  const handleReportGenerated = (report) => {
-    // 添加新报告到列表中
-    setGeneratedReports(prevReports => [...prevReports, report]);
-  };
-
-  const handleHistoryClick = () => {
-    navigate('/history');
-  };
+  const handleHistoryClick = () => navigate('/history');
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)' }}>
@@ -80,17 +67,20 @@ function Dashboard() {
               Medical AI Dashboard
             </Title>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <Space align="center">
+            <Button icon={<HistoryOutlined />} onClick={handleHistoryClick}>
+              Analysis History
+            </Button>
             <Tag color="blue" style={{ padding: '4px 16px', fontSize: '14px' }}>
               Healthcare Analytics
             </Tag>
-          </div>
+          </Space>
         </div>
       </Header>
 
       <Content style={{ padding: '24px' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          {/* 顶部统计卡片 */}
+          {/* Top statistics */}
           <Row gutter={16} style={{ marginBottom: '24px' }}>
             <Col span={6}>
               <Card
@@ -170,7 +160,7 @@ function Dashboard() {
               >
                 <Statistic
                   title={<span style={{ color: 'white' }}>Analysis History</span>}
-                  value="View All"
+                  value="Open"
                   prefix={<HistoryOutlined />}
                   valueStyle={{ color: '#fff', fontSize: '16px' }}
                 />
@@ -178,46 +168,72 @@ function Dashboard() {
             </Col>
           </Row>
 
-          {/* 主要内容区域 */}
+          {/* Main two columns */}
           <Row gutter={24}>
-            {/* 左侧列 - 文件上传 */}
+            {/* Left: upload & trigger */}
             <Col span={7}>
               <UploadImage
-                selectedFile={selectedFile}
-                isAnalyzing={isAnalyzing}
-                onFileChange={handleFileUpload}
+                onFileChange={(f) => setSelectedFile(f)}
+                onAnalysisFinished={(res) => {
+                  // 这里的 res 来自我们在 upload/api.js 里合并后的 analyzeBoth 输出
+                  if (!res || !res.success) {
+                    setAnalysisResults(null);
+                    message.error(res?.message || 'Analyze failed');
+                    return;
+                  }
+                  setAnalysisResults(res);
+                }}
               />
             </Col>
 
-            {/* 右侧列 - AI分析结果和知识图谱 */}
+            {/* Right: Knowledge Graph + AI Analysis Results */}
             <Col span={17}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', height: '100%' }}>
-                {/* AI分析结果 */}
-                <HeatmapDisplay
-                  analysisResults={analysisResults}
-                  isAnalyzing={isAnalyzing}
-                />
+                <Card title="Medical Knowledge Graph">
+                  <KnowledgeGraph analysisResults={analysisResults} selectedFile={selectedFile} />
+                  {!analysisResults && !selectedFile && (
+                    <Empty description="Upload an image to view related medical knowledge" />
+                  )}
+                </Card>
 
-                {/* 医学知识图谱 */}
-                <KnowledgeGraph
-                  analysisResults={analysisResults}
-                  selectedFile={selectedFile}
-                />
+                {/* AI Analysis Results Tabs */}
+                {analysisResults ? (
+                  <Card
+                    title="AI Analysis Results"
+                    extra={
+                      <Tag color={activeResultTab === 'heatmap' ? 'blue' : 'green'}>
+                        {activeResultTab === 'heatmap' ? 'Heatmap Mode' : 'Pathology Mode'}
+                      </Tag>
+                    }
+                  >
+                    <Tabs activeKey={activeResultTab} onChange={setActiveResultTab} size="large">
+                      {/* 热力图 */}
+                      <TabPane
+                        tab={<span><ThunderboltOutlined />Heatmap Analysis</span>}
+                        key="heatmap"
+                      >
+                        <HeatmapDisplay analysisResults={analysisResults} isAnalyzing={false} />
+                      </TabPane>
+
+                      {/* 病理标签：左右两列显示两个模型 */}
+                      <TabPane
+                        tab={<span><ExperimentOutlined />Pathology Labels</span>}
+                        key="pathology"
+                      >
+                        <PathologyLabels analysisResults={analysisResults} />
+                      </TabPane>
+                    </Tabs>
+                  </Card>
+                ) : null}
               </div>
             </Col>
           </Row>
 
-          {/* LLaVA报告生成模块 */}
+          {/* Report section with dual-model support */}
           {analysisResults && (
             <Row gutter={24} style={{ marginTop: '24px' }}>
-              <Col span={12}>
-                <ReportGenerator
-                  analysisData={analysisResults}
-                  onReportGenerated={handleReportGenerated}
-                />
-              </Col>
-              <Col span={12}>
-                <ReportDisplay reports={generatedReports} />
+              <Col span={24}>
+                <ReportSection analysisResults={analysisResults} />
               </Col>
             </Row>
           )}

@@ -1,80 +1,57 @@
+// upload/components/HeatmapDisplay.jsx
 import React from 'react';
-import { Card, Typography, Progress, Tag, Space } from 'antd';
-import { MedicineBoxOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import './HeatmapDisplay.css';
+import { Card, Typography, Progress, Tag, Space, Empty } from 'antd';
 
 const { Title, Text, Paragraph } = Typography;
 
-/**
- * 热力图和分析结果展示组件
- * @param {Object} analysisResults - 分析结果数据
- * @param {boolean} isAnalyzing - 是否正在分析
- */
-const HeatmapDisplay = ({ analysisResults, isAnalyzing }) => {
-  if (!analysisResults || isAnalyzing) {
-    return null;
-  }
+export default function HeatmapDisplay({ analysisResults, isAnalyzing }) {
+  if (!analysisResults) return null;
+
+  const {
+    disease,
+    confidence,
+    explanation,
+    recommendations = [],
+    heatmapUrl,
+    meta = {}
+  } = analysisResults;
 
   return (
-    <Card
-      title={
-        <Space>
-          <MedicineBoxOutlined style={{ color: '#059669' }} />
-          <span style={{ color: '#047857' }}>AI Analysis Results</span>
-        </Space>
-      }
-      className="heatmap-display-card"
-    >
-      <div className="heatmap-display-content">
-        {/* 检测到的疾病 */}
-        <div className="result-section">
-          <div className="disease-header">
-            <Title level={4} style={{ margin: 0 }}>
-              Detected Condition:
-              <Tag color="orange" className="disease-tag">
-                {analysisResults.disease}
-              </Tag>
-            </Title>
+    <Card className="heatmap-card" loading={isAnalyzing} title="AI 分析结果">
+      <Space direction="vertical" style={{ width: '100%' }}>
+        <Title level={4} style={{ marginBottom: 0 }}>{disease || '未知'}</Title>
+        <Progress percent={Math.round((confidence || 0) * 100)} />
+        <Paragraph style={{ marginTop: 8 }}>{explanation || '暂无详细说明'}</Paragraph>
+
+        {/* 只显示热力图 */}
+        <div className="image-pair">
+          {heatmapUrl ? (
+            <div className="image-col" style={{ width: '100%' }}>
+              <Text type="secondary">热力图</Text>
+              <img src={heatmapUrl} alt="heatmap" className="image" style={{ width: '100%', borderRadius: 8 }} />
+            </div>
+          ) : (
+            <Empty description="未生成热力图（可能阈值过高或未开启）" />
+          )}
+        </div>
+
+        {/* 建议/Top-K */}
+        <div className="reco-list">
+          {recommendations.map((rec, i) => (
+            <Tag key={i}>{`${rec.label} · ${rec.confidence}`}</Tag>
+          ))}
+        </div>
+
+        {/* meta */}
+        {meta ? (
+          <div className="meta">
+            <Text type="secondary">
+              模型：{meta.model_name || '-'} · 设备：{meta.device || '-'} · 耗时：
+              {typeof meta.inference_time_ms === 'number' ? `${meta.inference_time_ms} ms` : '-'}
+            </Text>
           </div>
-        </div>
-
-        {/* 置信度分数 */}
-        <div className="result-section">
-          <Text strong>Confidence Score:</Text>
-          <Progress
-            percent={analysisResults.confidence}
-            strokeColor={analysisResults.confidence > 80 ? '#52c41a' : '#faad14'}
-            style={{ marginTop: '8px' }}
-          />
-        </div>
-
-        {/* 解释说明 */}
-        <div className="result-section">
-          <Text strong style={{ display: 'block', marginBottom: '8px' }}>
-            Explanation:
-          </Text>
-          <Paragraph className="explanation-box">
-            {analysisResults.explanation}
-          </Paragraph>
-        </div>
-
-        {/* 建议列表 */}
-        <div className="result-section">
-          <Text strong style={{ display: 'block', marginBottom: '8px' }}>
-            Recommendations:
-          </Text>
-          <ul className="recommendations-list">
-            {analysisResults.recommendations.map((rec, index) => (
-              <li key={index} className="recommendation-item">
-                <CheckCircleOutlined style={{ color: '#10b981', marginRight: '8px' }} />
-                <Text>{rec}</Text>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+        ) : null}
+      </Space>
     </Card>
   );
-};
-
-export default HeatmapDisplay;
+}

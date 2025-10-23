@@ -1,142 +1,74 @@
+// src/features/llava-report/components/ReportGenerator.jsx
 import React, { useState } from 'react';
-import { Card, Space, Typography, Input, Row, Col, message } from 'antd';
-import { FileTextOutlined, RobotOutlined } from '@ant-design/icons';
-import Button from '../../../components/Button';
-import Loading from '../../../components/Loading';
-import { generateMedicalReport, generateMedicalReportV2 } from '../api';
-import './ReportGenerator.css';
-
-const { TextArea } = Input;
-const { Text } = Typography;
+import { Card, Button, Space, message } from 'antd';
+import { FileTextOutlined } from '@ant-design/icons';
+import { generateReport } from '../api';
 
 /**
- * AI报告生成器组件 - 基于LLaVA大模型
- * @param {Object} analysisData - 分析数据（用于生成报告）
- * @param {Function} onReportGenerated - 报告生成完成回调
+ * Props:
+ * - analysisData: 后端 /analyze 的返回（包含 classifications、heatmap_image_url 等）
+ * - onReportGenerated: function(text) -> void  // 生成后把文本回传给父组件
  */
-const ReportGenerator = ({ analysisData, onReportGenerated }) => {
-  const [customPrompt, setCustomPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
+export default function ReportGenerator({ analysisData, onReportGenerated }) {
+  const [loading, setLoading] = useState(false);
 
-  const handleGenerateReport = async () => {
-    setIsGenerating(true);
-
-    try {
-      // 调用真实的 LLaVA API
-      message.info('正在调用 LLaVA 模型生成报告，请稍候...');
-      const generatedReport = await generateMedicalReport(analysisData, customPrompt);
-
-      message.success(`报告生成成功！耗时 ${generatedReport.processingTime?.toFixed(2)} 秒`);
-      onReportGenerated(generatedReport);
-    } catch (error) {
-      console.error('报告生成失败:', error);
-      message.error(`报告生成失败: ${error.message}`);
-
-      // 如果 API 调用失败，可以选择显示一个错误报告
-      // 或者什么都不做，让用户重试
-    } finally {
-      setIsGenerating(false);
+  const handleGenerate = async () => {
+    if (!analysisData || !analysisData.success) {
+      message.warning('Please run analysis first.');
+      return;
     }
-  };
-
-  const handleGenerateReportV2 = async () => {
-    setIsGenerating(true);
-
     try {
-      // 调用 LLAVA-7B API
-      message.info('正在调用 LLAVA-7B 模型生成报告，请稍候...');
-      const generatedReport = await generateMedicalReportV2(analysisData, customPrompt);
+      setLoading(true);
 
-      message.success(`LLAVA-7B报告生成成功！耗时 ${generatedReport.processingTime?.toFixed(2)} 秒`);
-      onReportGenerated(generatedReport);
-    } catch (error) {
-      console.error('LLAVA-7B报告生成失败:', error);
-      message.error(`LLAVA-7B报告生成失败: ${error.message}`);
+      const classifications =
+        analysisData.classifications ||
+        analysisData.rawResponse?.classifications ||
+        [];
+
+      const heatmap =
+        analysisData.heatmapUrl ||
+        analysisData.heatmap_image_url ||
+        null;
+
+      const original =
+        analysisData.originalImageUrl ||
+        analysisData.original_image_url ||
+        null;
+
+      const res = await generateReport({
+        classifications,
+        heatmap_image_url: heatmap,
+        original_image_url: original,
+      });
+
+      if (res.success) {
+        onReportGenerated?.(res.report_text || '');
+        message.success('Report generated.');
+      } else {
+        onReportGenerated?.('');
+        message.error('Failed to generate report.');
+      }
+    } catch (e) {
+      onReportGenerated?.('');
+      message.error(e?.message || 'Network error');
     } finally {
-      setIsGenerating(false);
+      setLoading(false);
     }
   };
 
   return (
-    <Card
-      title={
-        <Space>
-          <RobotOutlined style={{ color: '#8b5cf6' }} />
-          <span style={{ color: '#7c3aed' }}>AI Report Generator (LLaVA)</span>
-        </Space>
-      }
-      className="report-generator-card"
-    >
-      <div className="report-generator-content">
-        <Row gutter={[16, 16]}>
-          <Col span={24}>
-            <div className="prompt-section">
-              <Text strong style={{ display: 'block', marginBottom: '8px' }}>
-                Custom Instructions (Optional):
-              </Text>
-              <TextArea
-                rows={4}
-                placeholder="Enter any specific requirements or focus areas for the medical report..."
-                value={customPrompt}
-                onChange={(e) => setCustomPrompt(e.target.value)}
-                disabled={isGenerating}
-                className="custom-prompt-input"
-              />
-            </div>
-          </Col>
-
-          <Col span={24}>
-            <div className="model-info">
-              <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                <Text type="secondary">
-                  <strong>Model:</strong> LLaVA-Med (Medical Visual Language Model)
-                </Text>
-                <Text type="secondary">
-                  <strong>Capabilities:</strong> Multi-modal medical image analysis, diagnostic reasoning, report generation
-                </Text>
-              </Space>
-            </div>
-          </Col>
-
-          <Col span={12}>
-            <Button
-              variant="primary"
-              gradient
-              size="large"
-              onClick={handleGenerateReport}
-              disabled={!analysisData || isGenerating}
-              style={{ width: '100%' }}
-              icon={<FileTextOutlined />}
-            >
-              {isGenerating ? 'Generating...' : 'Generate Report (LLaVA)'}
-            </Button>
-          </Col>
-
-          <Col span={12}>
-            <Button
-              variant="primary"
-              gradient
-              size="large"
-              onClick={handleGenerateReportV2}
-              disabled={!analysisData || isGenerating}
-              style={{ width: '100%', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
-              icon={<FileTextOutlined />}
-            >
-              {isGenerating ? 'Generating...' : 'Generate Report (LLAVA-7B)'}
-            </Button>
-          </Col>
-
-          <Col span={24}>
-            <Loading
-              visible={isGenerating}
-              message="AI is generating your comprehensive medical report..."
-              progress={100}
-            />
-          </Col>
-        </Row>
-      </div>
+    <Card title="Report Generator">
+      <Space>
+        <Button
+          type="primary"
+          icon={<FileTextOutlined />}
+          onClick={handleGenerate}
+          loading={loading}
+          disabled={!analysisData || !analysisData.success}
+        >
+          Generate Report
+        </Button>
+      </Space>
     </Card>
   );
-};
-
-export default ReportGenerator;
+}

@@ -44,3 +44,10 @@
   align-items: center;
   margin-bottom: 4px;
 }
+
+/* 占位样式（热力图未生成时） */
+.image.placeholder {
+  display: flex; align-items: center; justify-content: center;
+  background: #f5f5f5; border: 1px dashed #d9d9d9; height: 240px;
+  color: #999; font-size: 12px; border-radius: 8px;
+}
